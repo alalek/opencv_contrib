@@ -7,6 +7,7 @@
 
 #include <limits>   // numeric_limits
 #include "qualitybase.hpp"
+#include <iostream>
 
 namespace cv
 {
@@ -48,15 +49,17 @@ inline std::vector<R> expand_mats(InputArrayOfArrays arr, int TYPE_DEFAULT = EXP
     std::vector<R> result = {};
     std::vector<UMat> umats = {};
     std::vector<Mat> mats = {};
-
+    
     if (arr.isUMatVector())
         arr.getUMatVector(umats);
     else if (arr.isUMat())
         umats.emplace_back(arr.getUMat());
     else if (arr.isMatVector())
         arr.getMatVector(mats);
-    else if (arr.isMat())
+    else if (arr.isMat()) {
+        std::cout << "See? It's isMat" << std::endl;
         mats.emplace_back(arr.getMat());
+    }
     else
         CV_Error(Error::StsNotImplemented, "Unsupported input type");
 
@@ -66,7 +69,7 @@ inline std::vector<R> expand_mats(InputArrayOfArrays arr, int TYPE_DEFAULT = EXP
 
     for (auto& mat : mats)
         result.emplace_back(expand_mat<R>(mat, TYPE_DEFAULT ));
-
+    
     return result;
 }
 

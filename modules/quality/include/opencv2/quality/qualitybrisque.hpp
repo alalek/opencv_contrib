@@ -12,57 +12,48 @@ namespace cv
 namespace quality
 {
 
+/** @brief Custom deleter for QualityBRISQUE internal data */
+struct _QualityBRISQUEDeleter
+{
+    void operator()(void*) const;
+};
+
 /**
 @brief TODO:  Brief description and reference to original BRISQUE paper/implementation
 */
 class CV_EXPORTS_W QualityBRISQUE : public QualityBase {
 public:
 
-    /** @brief Computes XXX for reference images supplied in class constructor and provided comparison images
+    /** @brief Computes BRISQUE quality score for input images
     @param imgs Images for which to compute quality
-    @returns TODO:  describe the resulting cv::Scalar
+    @returns Result is a score (averaged over individual scores of all images) ranging from 0 to 100 (0 denotes the best quality and 100 denotes the poorest quality)
     */
     CV_WRAP cv::Scalar compute( InputArrayOfArrays imgs ) CV_OVERRIDE;
 
     /**
     @brief Create an object which calculates quality
+    @param model_file_path cv::String which contains a path to the BRISQUE model data.  If empty, attempts to load from ${OPENCV_DIR}/testdata/contrib/quality/brisque_allmodel.dat
+    @param range_file_path cv::String which contains a path to the BRISQUE range data.  If empty, attempts to load from ${OPENCV_DIR}/testdata/contrib/quality/brisque_allrange.dat
     */
-    CV_WRAP static Ptr<QualityBRISQUE> create(cv::String model, cv::String range);
+    CV_WRAP static Ptr<QualityBRISQUE> create( const cv::String& model_file_path = "", const cv::String& range_file_path = "" );
 
     /**
     @brief static method for computing quality
-    @param model cv::String containing BRISQUE calculation model
-    @param range cv::String containing BRISQUE calculation range
     @param imgs image(s) for which to compute quality
-    @param qualityMaps output quality map(s), or cv::noArray()  TODO:  remove this parameter if algorithm doesn't generate output quality maps
-    @returns TODO:  describe the resulting cv::Scalar
+    @param model_file_path cv::String which contains a path to the BRISQUE model data.  If empty, attempts to load from ${OPENCV_DIR}/testdata/contrib/quality/brisque_allmodel.dat
+    @param range_file_path cv::String which contains a path to the BRISQUE range data.  If empty, attempts to load from ${OPENCV_DIR}/testdata/contrib/quality/brisque_allrange.dat
+    @returns 
     */
-    CV_WRAP static cv::Scalar compute( const cv::String& model, const cv::String& range, InputArrayOfArrays imgs, OutputArrayOfArrays qualityMaps );
-
-    /** @brief return the model used for computation */
-    CV_WRAP const cv::String& getModel() const { return _model; }
-
-    /** @brief sets the model used for computation */
-    CV_WRAP void setModel( cv::String val ) { this->_model = std::move(val); }
-
-    /** @brief return the range used for computation */
-    CV_WRAP const cv::String& getRange() const { return _range; }
-
-    /** @brief sets the range used for computation */
-    CV_WRAP void setRange(cv::String val) { this->_range = std::move(val); }
+    CV_WRAP static cv::Scalar compute_single( const Mat& cmpImg, const cv::String& model_file_path, const cv::String& range_file_path );
+    CV_WRAP static cv::Scalar compute( InputArrayOfArrays imgs, const cv::String& model_file_path, const cv::String& range_file_path );
 
 protected:
 
-    /**
-    @brief Constructor
-    */
-    QualityBRISQUE( cv::String model, cv::String range );
+    /** @brief Internal constructor */
+    QualityBRISQUE( const cv::String& model_file_path, const cv::String& range_file_path );
 
-    /** @brief BRISQUE model string */
-    cv::String _model;
-
-    /** @brief BRISQUE range string */
-    cv::String _range;
+    /** @brief Type-erased holder for libsvm data, using custom deleter */
+    std::unique_ptr<void, _QualityBRISQUEDeleter> _svm_data;
 
 };  // QualityBRISQUE
 }   // quality

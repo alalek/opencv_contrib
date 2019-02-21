@@ -3,10 +3,12 @@
 // of this distribution and at http://opencv.org/license.html.
 
 #include "precomp.hpp"
+#include <fstream>
 #include "opencv2/imgproc.hpp"
 #include "opencv2/quality/qualitybrisque.hpp"
 #include "opencv2/quality/quality_utils.hpp"
 #include "opencv2/quality/libsvm/svm.hpp"   // libsvm
+#include <iostream>
 
 namespace
 {
@@ -18,6 +20,63 @@ namespace
 
     // the type of quality map we'll generate (if brisque generates one)
     using _quality_map_type = brisque_mat_type;
+
+    // handles loading/unloading/storage of brisque svm data
+    struct brisque_svm_data
+    {
+        static constexpr const std::size_t RANGE_SIZE = 36U;
+        using range_type = float;
+
+        svm_model* model = nullptr;
+
+        std::array<range_type, RANGE_SIZE> 
+            range_min = { (range_type)0. }
+            , range_max = { (range_type)0. }
+        ;
+
+        // constructor; loads model and range data from files
+        brisque_svm_data( const cv::String& model_file_path, const cv::String& range_file_path )
+        {
+            this->model = svm_load_model(model_file_path.c_str());
+            if (!this->model)
+                CV_Error(cv::Error::StsParseError, "Error loading BRISQUE model file");
+
+            if (!load_range_data(range_file_path))
+                CV_Error(cv::Error::StsParseError, "Invalid range data file");
+        }
+
+        // destructor
+        ~brisque_svm_data()
+        {
+            if (this->model != nullptr)
+            {
+                svm_free_and_destroy_model(&this->model);
+                this->model = nullptr;
+            }
+        }
+
+        // based on original brisque impl
+        bool load_range_data(const cv::String& file_path)
+        {
+            //check if file exists
+            char buff[100];
+            FILE* range_file = fopen(file_path.c_str(), "r");
+            if (range_file == NULL)
+                return false;
+
+            //assume standard file format for this program	
+            fgets(buff, 100, range_file);
+            fgets(buff, 100, range_file);
+            //now we can fill the array
+            for (std::size_t i = 0; i < RANGE_SIZE; ++i) {
+                float a, b, c;
+                fscanf(range_file, "%f %f %f", &a, &b, &c);
+                this->range_min[i] = (range_type)b;
+                this->range_max[i] = (range_type)c;
+            }
+            return true;
+        }
+    };
 
     template<class T> class Image {
     private:
@@ -39,6 +98,29 @@ namespace
     };
 
     typedef Image<double> BwImage;
+
+    // based on original brisque impl
+    // we don't need this function
+    // bool load_brisque_range_data(const cv::String& file_path )
+    // {
+    //     //check if file exists
+    //     char buff[100];
+    //     int i;
+    //     FILE* range_file = fopen(file_path.c_str(), "r");
+    //     if (range_file == NULL)
+    //         return false;
+
+    //     //assume standard file format for this program	
+    //     fgets(buff, 100, range_file);
+    //     fgets(buff, 100, range_file);
+    //     //now we can fill the array
+    //     for (i = 0; i < 36; ++i) {
+    //         float a, b, c;
+    //         fscanf(range_file, "%f %f %f", &a, &b, &c);
+            
+    //     }
+    //     return true;
+    // }
 
     // function to compute best fit parameters from AGGDfit 
     cv::Mat AGGDfit(cv::Mat structdis, double& lsigma_best, double& rsigma_best, double& gamma_best)
@@ -94,10 +176,13 @@ namespace
 
     void ComputeBrisqueFeature(cv::Mat& orig, std::vector<double>& featurevector)
     {
-
         Mat orig_bw_int(orig.size(), CV_64F, 1);
         // convert to grayscale 
-        cv::cvtColor(orig, orig_bw_int, cv::COLOR_BGR2GRAY);
+        if(orig.channels() != 1)
+          cv::cvtColor(orig, orig_bw_int, cv::COLOR_BGR2GRAY);
+        else 
+          orig_bw_int = orig;
+
         // create a copy of original image
         Mat orig_bw(orig_bw_int.size(), CV_64FC1, 1);
         orig_bw_int.convertTo(orig_bw, 1.0 / 255);
@@ -194,34 +279,31 @@ namespace
         }
     }
 
-    // float computescore(String imagename) {
-    double computescore( const cv::String& model_, const cv::String& range_, cv::Mat& orig ) {
+    double computescore( const brisque_svm_data& svm_data, cv::Mat& orig ) {
         // pre-loaded vectors from allrange file 
-        float min_[36] = { 0.336999 ,0.019667 ,0.230000 ,-0.125959 ,0.000167 ,0.000616 ,0.231000 ,-0.125873 ,0.000165 ,0.000600 ,0.241000 ,-0.128814 ,0.000179 ,0.000386 ,0.243000 ,-0.133080 ,0.000182 ,0.000421 ,0.436998 ,0.016929 ,0.247000 ,-0.200231 ,0.000104 ,0.000834 ,0.257000 ,-0.200017 ,0.000112 ,0.000876 ,0.257000 ,-0.155072 ,0.000112 ,0.000356 ,0.258000 ,-0.154374 ,0.000117 ,0.000351 };
-        float max_[36] = { 9.999411, 0.807472, 1.644021, 0.202917, 0.712384, 0.468672, 1.644021, 0.169548, 0.713132, 0.467896, 1.553016, 0.101368, 0.687324, 0.533087, 1.554016, 0.101000, 0.689177, 0.533133, 3.639918, 0.800955, 1.096995, 0.175286, 0.755547, 0.399270, 1.095995, 0.155928, 0.751488, 0.402398, 1.041992, 0.093209, 0.623516, 0.532925, 1.042992, 0.093714, 0.621958, 0.534484 };
+        // float min_[36] = { 0.336999 ,0.019667 ,0.230000 ,-0.125959 ,0.000167 ,0.000616 ,0.231000 ,-0.125873 ,0.000165 ,0.000600 ,0.241000 ,-0.128814 ,0.000179 ,0.000386 ,0.243000 ,-0.133080 ,0.000182 ,0.000421 ,0.436998 ,0.016929 ,0.247000 ,-0.200231 ,0.000104 ,0.000834 ,0.257000 ,-0.200017 ,0.000112 ,0.000876 ,0.257000 ,-0.155072 ,0.000112 ,0.000356 ,0.258000 ,-0.154374 ,0.000117 ,0.000351 };
+        // float max_[36] = { 9.999411, 0.807472, 1.644021, 0.202917, 0.712384, 0.468672, 1.644021, 0.169548, 0.713132, 0.467896, 1.553016, 0.101368, 0.687324, 0.533087, 1.554016, 0.101000, 0.689177, 0.533133, 3.639918, 0.800955, 1.096995, 0.175286, 0.755547, 0.399270, 1.095995, 0.155928, 0.751488, 0.402398, 1.041992, 0.093209, 0.623516, 0.532925, 1.042992, 0.093714, 0.621958, 0.534484 };
 
         double qualityscore;
         int i;
         struct svm_model* model; // create svm model object
-        // cv::Mat orig = cv::imread(imagename, 1); // read image (color mode)
 
         std::vector<double> brisqueFeatures; // feature vector initialization
         ComputeBrisqueFeature(orig, brisqueFeatures); // compute brisque features
+        model = svm_data.model;
 
         // use the pre-trained allmodel file
 
-        // TODO:  Use model and range parameters provided to this function instead
+        // String modelfile = "allmodel";
+        // if ((model = svm_load_model(modelfile.c_str())) == 0) {
+        //     fprintf(stderr, "can't open model file allmodel\n");
+        //     exit(1);
+        // }
 
-        String modelfile = "allmodel";
-        if ((model = svm_load_model(modelfile.c_str())) == 0) {
-            fprintf(stderr, "can't open model file allmodel\n");
-            exit(1);
-        }
-
-        // float min_[37];
-        // float max_[37];
-        //
         struct svm_node x[37];
+        std::array<float, 36> min_ = svm_data.range_min;
+        std::array<float, 36> max_ = svm_data.range_max;
+
         // rescale the brisqueFeatures vector from -1 to 1 
         // also convert vector to svm node array object
         for (i = 0; i < 36; ++i) {
@@ -244,81 +326,100 @@ namespace
         return qualityscore;
     }
 
-    // computes score and quality map for single frame
-    std::pair<cv::Scalar, _quality_map_type> compute( const cv::String& model, const cv::String& range, brisque_mat_type& img )
+    // computes score for a single frame
+    double compute( const brisque_svm_data& svm_data, brisque_mat_type& img )
     {
-        std::pair<cv::Scalar, _quality_map_type> result;
-
-        // TODO:  calculate score and quality map for the input image, which is a single frame
-        //  place score in result.first, and quality map in result.second
-
-        result.first = cv::Scalar{ 0. };
-        result.first[0] = computescore( model, range, img);  
-
-        // is there a quality map that can be generated?
-
-        return result;
+        double score = computescore( svm_data, img );
+        return score;
     }
 
-    // computes score and quality maps for multiple frames
-    cv::Scalar compute( const cv::String& model, const cv::String& range, std::vector<brisque_mat_type>& imgs, OutputArrayOfArrays qualityMaps )
+    cv::Scalar compute( const brisque_svm_data& svm_data, std::vector<brisque_mat_type>& imgs )
     {
         CV_Assert(imgs.size() > 0);
 
-        cv::Scalar result = {};
-        std::vector<_quality_map_type> quality_maps = {};
+        // cv::Scalar result(imgs.size());
+        cv::Scalar scores;
+
         const auto sz = imgs.size();
-
-        // future optimization:  convert model and range to libsvm types here instead of every time we compute for a frame
-        //  ideally, these would be created in the constructor so they are only created once per instantiation
-
+        
         for (unsigned i = 0; i < sz; ++i)
         {
-            auto cmp = compute( model, range, imgs[i] );
-            cv::add(result, cmp.first, result);
-
-            if ( qualityMaps.needed() )
-                quality_maps.emplace_back(std::move(cmp.second));
-        }
-
-        if (qualityMaps.needed())
-        {
-            auto qMaps = InputArray(quality_maps);
-            qualityMaps.create(qMaps.size(), qMaps.type());
-            qualityMaps.assign(quality_maps);
+            auto cmp = compute( svm_data, imgs[i] );
+            cv::add(scores, cmp, scores);
         }
 
         if (sz > 1)
-            result /= (cv::Scalar::value_type)sz;   // average result
+            scores /= (cv::Scalar::value_type)sz;   // average result
+            // accumulate( scores.begin(), scores.end(), 0.0 )/scores.size();
 
-        return result;
+        return scores;
     }
 }
 
-// static
-Ptr<QualityBRISQUE> QualityBRISQUE::create(cv::String model, cv::String range)
+void _QualityBRISQUEDeleter::operator()(void* ptr) const
 {
-    return Ptr<QualityBRISQUE>(new QualityBRISQUE( std::move(model), std::move(range)));
+    if (ptr == nullptr)
+        return;
+
+    brisque_svm_data* data_ptr = (brisque_svm_data*)ptr;
+    if (data_ptr == nullptr)
+        return; // this is probably being called in a destructor, don't throw
+
+    delete data_ptr;
 }
 
 // static
-cv::Scalar QualityBRISQUE::compute( const cv::String& model, const cv::String& range, InputArrayOfArrays imgs, OutputArrayOfArrays qualityMaps)
+Ptr<QualityBRISQUE> QualityBRISQUE::create( const cv::String& model_file_path, const cv::String& range_file_path )
 {
-    auto vec = quality_utils::expand_mats<brisque_mat_type>(imgs);// convert inputarrayofarrays to vector of brisque_mat_type
-    return ::compute(model, range, vec, qualityMaps);
+    return Ptr<QualityBRISQUE>(new QualityBRISQUE( model_file_path, range_file_path ));
+}
+
+cv::Scalar QualityBRISQUE::compute_single(const brisque_mat_type& cmpImg, const cv::String& model_file_path, const cv::String& range_file_path )
+{
+    auto obj = create(model_file_path, range_file_path);
+    cv::Scalar result = obj->compute(cmpImg);
+    return result;
+}
+
+cv::Scalar QualityBRISQUE::compute(InputArrayOfArrays imgs, const cv::String& model_file_path, const cv::String& range_file_path )
+{
+    auto obj = create(model_file_path, range_file_path);
+    return obj->compute(imgs);
 }
 
 // QualityBRISQUE() constructor
-QualityBRISQUE::QualityBRISQUE( cv::String model, cv::String range )
-    : _model(std::move(model))
-    , _range(std::move(range))
+QualityBRISQUE::QualityBRISQUE( const cv::String& model_file_path, const cv::String& range_file_path )
 {
-    // would be nice to convert the model/range strings to libsvm models
+    // construct data file path from OPENCV_DIR env var and quality subdir
+    const auto get_data_path = [](const cv::String& fname)
+    {
+        cv::String path{ std::getenv("OPENCV_DIR") };
+        return path.empty()
+            ? path  // empty
+            : path + "/testdata/contrib/quality/" + fname
+            ;
+    };
+
+    const auto
+        modelpath = model_file_path.empty() ? get_data_path("brisque_allmodel.dat") : model_file_path
+        , rangepath = range_file_path.empty() ? get_data_path("brisque_allrange.dat") : range_file_path
+        ;
+    
+    if ( modelpath.empty() )
+        CV_Error(cv::Error::StsObjectNotFound, "BRISQUE model data not found");
+
+    if ( rangepath.empty() )
+        CV_Error(cv::Error::StsObjectNotFound, "BRISQUE range data not found");
+
+    // convert the model/range files to libsvm models
     //  and store in a unique_ptr<void> with a custom deleter in the qualitybrisque object so we don't expose libsvm headers
+    this->_svm_data.reset(new brisque_svm_data( modelpath, rangepath ));
+
 }
 
 cv::Scalar QualityBRISQUE::compute( InputArrayOfArrays imgs )
 {
     auto vec = quality_utils::expand_mats<brisque_mat_type>(imgs);// convert inputarrayofarrays to vector of brisque_mat_type
-    return ::compute( this->getModel(), this->getRange(), vec, this->_qualityMaps);
+    const brisque_svm_data* data_ptr = static_cast<const brisque_svm_data*>(this->_svm_data.get());
+    return ::compute( *data_ptr, vec );
 }
