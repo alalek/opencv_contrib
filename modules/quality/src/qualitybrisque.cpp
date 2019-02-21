@@ -89,13 +89,13 @@ namespace
                 return false;
 
             //assume standard file format for this program	
-            fgets(buff, 100, range_file);
-            fgets(buff, 100, range_file)
-
+            CV_Assert(fgets(buff, 100, range_file) != NULL);
+            CV_Assert(fgets(buff, 100, range_file) != NULL);
+            
             //now we can fill the array
             for (std::size_t i = 0; i < RANGE_SIZE; ++i) {
                 float a, b, c;
-                fscanf(range_file, "%f %f %f", &a, &b, &c);
+                CV_Assert(fscanf(range_file, "%f %f %f", &a, &b, &c) == 3);
                 this->range_min[i] = (range_type)b;
                 this->range_max[i] = (range_type)c;
             }
