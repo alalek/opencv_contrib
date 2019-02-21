@@ -316,11 +316,13 @@ namespace
 
 
         int nr_class = svm_get_nr_class(model);
-        double *prob_estimates = (double *)malloc(nr_class * sizeof(double));
-        // predict quality score using libsvm class
-        qualityscore = svm_predict_probability(model, x, prob_estimates);
+        // double *prob_estimates = (double *)malloc(nr_class * sizeof(double));
+        std::vector<double> prob_estimates = std::vector<double>(nr_class);
 
-        free(prob_estimates); // convert to vector<double> TODO
+        // predict quality score using libsvm class
+        qualityscore = svm_predict_probability(model, x, prob_estimates.data());
+
+        // free(prob_estimates); // convert to vector<double> TODO
         return qualityscore;
     }
 
