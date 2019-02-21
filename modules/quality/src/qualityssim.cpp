@@ -126,7 +126,7 @@ cv::Scalar QualitySSIM::_mat_data::compute(const std::vector<_mat_data>& lhs, co
     Scalar result = {};
     std::vector<QualityBase::_quality_map_type> quality_maps = {};
     const auto sz = lhs.size();
-    
+
     for (unsigned i = 0; i < sz; ++i)
     {
         CV_Assert(!lhs.empty() && !rhs.empty());
