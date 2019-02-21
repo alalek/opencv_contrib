@@ -338,21 +338,21 @@ namespace
         CV_Assert(imgs.size() > 0);
 
         // cv::Scalar result(imgs.size());
-        cv::Scalar scores;
+        cv::Scalar result;
 
         const auto sz = imgs.size();
         
         for (unsigned i = 0; i < sz; ++i)
         {
             auto cmp = compute( svm_data, imgs[i] );
-            cv::add(scores, cmp, scores);
+            cv::add(result, cmp, result);
         }
 
         if (sz > 1)
-            scores /= (cv::Scalar::value_type)sz;   // average result
+            result /= (cv::Scalar::value_type)sz;   // average result
             // accumulate( scores.begin(), scores.end(), 0.0 )/scores.size();
 
-        return scores;
+        return result;
     }
 }
 
