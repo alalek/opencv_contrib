@@ -57,7 +57,6 @@ inline std::vector<R> expand_mats(InputArrayOfArrays arr, int TYPE_DEFAULT = EXP
     else if (arr.isMatVector())
         arr.getMatVector(mats);
     else if (arr.isMat()) {
-        std::cout << "See? It's isMat" << std::endl;
         mats.emplace_back(arr.getMat());
     }
     else

@@ -80,6 +80,13 @@ TEST(TEST_CASE_NAME, multi_frame)
     quality_test(create_brisque(), get_testfile_1a2a(), expected, 0 );
 }
 
+TEST(TEST_CASE_NAME, model_persistence )
+{
+    auto alg = create_brisque();
+    quality_test(alg, get_testfile_1a(), BRISQUE_EXPECTED_1);  
+    quality_test(alg, get_testfile_1a(), BRISQUE_EXPECTED_1);   
+}
+
 // internal a/b test
 /*
 TEST(TEST_CASE_NAME, performance)

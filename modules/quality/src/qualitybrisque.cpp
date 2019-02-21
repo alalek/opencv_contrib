@@ -62,12 +62,13 @@ namespace
                 return false;
 
             //assume standard file format for this program	
-            (void)fgets(buff, 100, range_file);
-            (void)fgets(buff, 100, range_file);
+            fgets(buff, 100, range_file);
+            fgets(buff, 100, range_file)
+
             //now we can fill the array
             for (std::size_t i = 0; i < RANGE_SIZE; ++i) {
                 float a, b, c;
-                (void)fscanf(range_file, "%f %f %f", &a, &b, &c);
+                fscanf(range_file, "%f %f %f", &a, &b, &c);
                 this->range_min[i] = (range_type)b;
                 this->range_max[i] = (range_type)c;
             }

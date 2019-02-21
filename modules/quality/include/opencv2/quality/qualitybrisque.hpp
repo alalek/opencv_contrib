@@ -57,7 +57,7 @@ protected:
 
     /** @brief Internal constructor */
     QualityBRISQUE( const cv::String& model_file_path, const cv::String& range_file_path );
-
+    
     /** @brief Type-erased holder for libsvm data, using custom deleter */
     std::unique_ptr<void, _QualityBRISQUEDeleter> _svm_data;
 
