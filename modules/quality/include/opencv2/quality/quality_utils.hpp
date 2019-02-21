@@ -7,7 +7,6 @@
 
 #include <limits>   // numeric_limits
 #include "qualitybase.hpp"
-#include <iostream>
 
 namespace cv
 {
