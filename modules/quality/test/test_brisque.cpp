@@ -34,7 +34,7 @@ TEST(TEST_CASE_NAME, static_ )
 {
     quality_expect_near(
         quality::QualityBRISQUE::compute(
-            get_testfile_1a() 
+            get_testfile_1a()
             , cvtest::findDataFile("brisque_allmodel.dat", false)
             , cvtest::findDataFile("brisque_allrange.dat", false)
         )

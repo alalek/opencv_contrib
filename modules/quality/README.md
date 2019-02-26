@@ -17,7 +17,7 @@ Implementation of various image quality analysis (IQA) algorithms
   In general, the GMSD algorithm should yield the best result for full-reference IQA.
 
 - **Blind/Referenceless Image Spatial Quality Evaluation (BRISQUE)**
-  http://live.ece.utexas.edu/research/Quality/nrqa.htm 
+  http://live.ece.utexas.edu/research/Quality/nrqa.htm
 
 Interface/Usage
 -----------------------------------------
@@ -33,8 +33,7 @@ to convert input images to grayscale images prior to processing.
 SSIM and GMSD were originally tested by their respective researchers on grayscale uint8 images,
 but this implementation will compute the values for each channel if the user desires to do so.
 
-BRISQUE is a NR-IQA algorithm (No-Reference) which doesn't require a reference
-image. 
+BRISQUE is a NR-IQA algorithm (No-Reference) which doesn't require a reference image. 
 
 Quick Start/Usage
 -----------------------------------------
@@ -44,13 +43,10 @@ Quick Start/Usage
 
 ```cpp
     #include <opencv2/quality.hpp>
-
     cv::Mat img1, img2; /* your cv::Mat images */
     std::vector<cv::Mat> quality_maps;  /* output quality map(s) (optional) */
-
-     /* compute MSE via static method */
+    /* compute MSE via static method */
     cv::Scalar result_static = quality::QualityMSE::compute(img1, img2, quality_maps);  /* or cv::noArray() if not interested in output quality maps */
-
     /* alternatively, compute MSE via instance */
     cv::Ptr<quality::QualityBase> ptr = quality::QualityMSE::create(img1);
     cv::Scalar result = ptr->compute( img2 );  /* compute MSE, compare img1 vs img2 */
@@ -58,18 +54,15 @@ Quick Start/Usage
 ```
 
 **For No Reference IQA Algorithm (BRISQUE)**
- 
-```cpp 
+
+```cpp
     #include <opencv2/quality.hpp>
-    
-    cv::Mat img; 
+    cv::Mat img;
     cv::String model_path = "allmodel"; // path to the trained model
     cv::String range_path = "allrange"; // path to range file
-    
     /* compute BRISQUE quality score via static method */
     cv::Scalar result_static = quality::QualityBRISQUE::compute(img,
 model_path, range_path);
-    
     /* alternatively, compute BRISQUE via instance */
     cv::Ptr<quality::QualityBase> ptr = quality::QualityBRISQUE::create(img);
     cv::Scalar result = ptr->compute(img); /* computes BRISQUE score for img */
@@ -81,41 +74,34 @@ model_path, range_path);
 
 ```python
     import cv2
-    
-    # read images 
+    # read images
     img1 = cv2.imread(img1, 1) # specify img1
     img2 = cv2.imread(img2_path, 1) # specify img2_path
-
     # compute MSE score and quality maps via static method
-    result_static, quality_maps = cv2.quality.QualityMSE_compute(img1, img2) 
-    
+    result_static, quality_maps = cv2.quality.QualityMSE_compute(img1, img2)
     # compute MSE score and quality maps via Instance
     obj = cv2.quality.QualityMSE_create(img1)
-    result = obj.compute(img2) 
-    quality_maps = obj.getQualityMaps() 
+    result = obj.compute(img2)
+    quality_maps = obj.getQualityMaps()
 ```
     
 **For No Reference IQA Algorithm (BRISQUE)**
 
 ```python
     import cv2
-    
     # read image
-    img = cv2.imread(img_path, 1) # mention img_path 
-    
+    img = cv2.imread(img_path, 1) # mention img_path
     # make a list of image to be passed
     img_list = [img]
-    
     # compute brisque quality score via static method
     score = cv2.quality.QualityBRISQUE_compute(img_list, model_path,
 range_path) # specify model_path and range_path
-    
     # compute brisque quality score via instance
-    obj = cv2.quality.QualityBRISQUE_create(model_path, range_path) # specify
-model_path and range_path
+    # specify model_path and range_path
+    obj = cv2.quality.QualityBRISQUE_create(model_path, range_path) 
     score = obj.compute(img_list)
 ```
-    
+
 Library Design
 -----------------------------------------
 Each implemented algorithm shall:

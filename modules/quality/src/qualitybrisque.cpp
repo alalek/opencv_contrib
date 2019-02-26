@@ -64,10 +64,8 @@ namespace
 
         svm_model* model = nullptr;
 
-        std::array<range_type, RANGE_SIZE>
-            range_min = { (range_type)0. }
-            , range_max = { (range_type)0. }
-        ;
+        std::array<range_type, RANGE_SIZE> range_min = { (range_type)0. };
+        std::array<range_type, RANGE_SIZE> range_max = { (range_type)0. };
 
         // constructor; loads model and range data from files
         brisque_svm_data(const cv::String& model_file_path, const cv::String& range_file_path)
@@ -137,7 +135,7 @@ namespace
 
     typedef Image<brique_calc_element_type> BwImage;
 
-    // function to compute best fit parameters from AGGDfit 
+    // function to compute best fit parameters from AGGDfit
     brisque_mat_type AGGDfit(brisque_mat_type structdis, double& lsigma_best, double& rsigma_best, double& gamma_best)
     {
         // create a copy of an image using BwImage constructor (brisque.h - more info)
@@ -175,8 +173,8 @@ namespace
 
         double prevgamma = 0;
         double prevdiff = 1e10;
-        float sampling = 0.001;
-        for (float gam = 0.2; gam < 10; gam += sampling) //possible to coarsen sampling to quicken the code, with some loss of accuracy
+        double sampling = 0.001;
+        for (double gam = 0.2; gam < 10; gam += sampling) //possible to coarsen sampling to quicken the code, with some loss of accuracy
         {
             double r_gam = tgamma(2 / gam)*tgamma(2 / gam) / (tgamma(1 / gam)*tgamma(3 / gam));
             double diff = abs(r_gam - rhatnorm);
@@ -194,7 +192,6 @@ namespace
         CV_Assert(orig.channels() == 1);
 
         auto orig_bw = orig;
-        
         // orig_bw now contains the grayscale image normalized to the range 0,1
         int scalenum = 2; // number of times to scale the image
         for (int itr_scale = 1; itr_scale <= scalenum; itr_scale++)
@@ -272,7 +269,7 @@ namespace
                 // calculate the products of the pairs
                 cv::multiply(structdis, shifted_structdis, shifted_structdis);
 
-                // fit the pairwise product to AGGD 
+                // fit the pairwise product to AGGD
                 shifted_structdis = AGGDfit(shifted_structdis, lsigma_best, rsigma_best, gamma_best);
 
                 double constant = sqrt(tgamma(1 / gamma_best)) / sqrt(tgamma(3 / gamma_best));
@@ -298,7 +295,7 @@ namespace
 
         struct svm_node x[37];
 
-        // rescale the brisqueFeatures vector from -1 to 1 
+        // rescale the brisqueFeatures vector from -1 to 1
         // also convert vector to svm node array object
         for (i = 0; i < 36; ++i) {
             float min = svm_data.range_min[i];
@@ -427,7 +424,6 @@ cv::Scalar QualityBRISQUE::compute(InputArrayOfArrays imgs)
         // scale to 0-1 range
         mat.convertTo(mat, BRISQUE_CALC_MAT_TYPE, 1. / 255.);
     }
-    
     const brisque_svm_data* data_ptr = static_cast<const brisque_svm_data*>(this->_svm_data.get());
     return ::compute(*data_ptr, vec);
 }
