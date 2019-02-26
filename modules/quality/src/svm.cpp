@@ -247,8 +247,8 @@ public:
 
     static double k_function(const svm_node *x, const svm_node *y,
         const svm_parameter& param);
-    virtual Qfloat *get_Q(int column, int len) const = 0;
-    virtual double *get_QD() const = 0;
+    virtual Qfloat *get_Q(int column, int len) const override = 0;
+    virtual double *get_QD() const override = 0;
     virtual void swap_index(int i, int j) const override// no so const...
     {
         swap(x[i], x[j]);
