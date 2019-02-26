@@ -64,8 +64,8 @@ namespace
 
         svm_model* model = nullptr;
 
-        std::array<range_type, RANGE_SIZE> range_min = { (range_type)0. };
-        std::array<range_type, RANGE_SIZE> range_max = { (range_type)0. };
+        std::array<range_type, RANGE_SIZE> range_min = {};
+        std::array<range_type, RANGE_SIZE> range_max = {};
 
         // constructor; loads model and range data from files
         brisque_svm_data(const cv::String& model_file_path, const cv::String& range_file_path)
