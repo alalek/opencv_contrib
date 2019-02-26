@@ -33,7 +33,7 @@ to convert input images to grayscale images prior to processing.
 SSIM and GMSD were originally tested by their respective researchers on grayscale uint8 images,
 but this implementation will compute the values for each channel if the user desires to do so.
 
-BRISQUE is a NR-IQA algorithm (No-Reference) which doesn't require a reference image. 
+BRISQUE is a NR-IQA algorithm (No-Reference) which doesn't require a reference image.
 
 Quick Start/Usage
 -----------------------------------------
@@ -84,7 +84,7 @@ model_path, range_path);
     result = obj.compute(img2)
     quality_maps = obj.getQualityMaps()
 ```
-    
+
 **For No Reference IQA Algorithm (BRISQUE)**
 
 ```python
@@ -98,7 +98,7 @@ model_path, range_path);
 range_path) # specify model_path and range_path
     # compute brisque quality score via instance
     # specify model_path and range_path
-    obj = cv2.quality.QualityBRISQUE_create(model_path, range_path) 
+    obj = cv2.quality.QualityBRISQUE_create(model_path, range_path)
     score = obj.compute(img_list)
 ```
 
