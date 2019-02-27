@@ -58,13 +58,14 @@ Quick Start/Usage
 ```cpp
     #include <opencv2/quality.hpp>
     cv::Mat img;
-    cv::String model_path = "allmodel"; // path to the trained model
-    cv::String range_path = "allrange"; // path to range file
+    // check testdata subdirectory
+    cv::String model_path = "testdata/brisque_allmodel.dat"; // path to the trained model
+    cv::String range_path = "testdata/brisque_allrange.dat"; // path to range file
     /* compute BRISQUE quality score via static method */
     cv::Scalar result_static = quality::QualityBRISQUE::compute(img,
 model_path, range_path);
     /* alternatively, compute BRISQUE via instance */
-    cv::Ptr<quality::QualityBase> ptr = quality::QualityBRISQUE::create(img);
+    cv::Ptr<quality::QualityBase> ptr = quality::QualityBRISQUE::create(model_path, range_path);
     cv::Scalar result = ptr->compute(img); /* computes BRISQUE score for img */
 ```
 
