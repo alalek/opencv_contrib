@@ -118,7 +118,7 @@ namespace
     private:
         brisque_mat_type imgP;
     public:
-        Image(brisque_mat_type img = 0) {
+        Image(brisque_mat_type img) {
             imgP = img.clone();
         }
         ~Image() {
