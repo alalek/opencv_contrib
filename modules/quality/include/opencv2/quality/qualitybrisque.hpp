@@ -22,8 +22,7 @@ struct _QualityBRISQUEDeleter
 @brief BRISQUE (Blind/Referenceless Image Spatial Quality Evaluator) is a type of No Reference
 Image Quality Assessment. It measures score based on extracting Natural Scene Satistics (https://en.wikipedia.org/wiki/Scene_statistics)
 and calculating feature vectors. The current implementation uses trained model on TID 2008 Database (http://www.ponomarenko.info/tid2008.htm).
-Original paper: http://dl.icdst.org/pdfs/files/b58b8ccd6a0fea308dc365bc5882ba67.pdf by A Mittal et al
-Original Implementation: http://live.ece.utexas.edu/research/quality/BRISQUE_release.zip
+@cite Mittal2 for original paper and @cite Mittal2_software for original implementation
 */
 class CV_EXPORTS_W QualityBRISQUE : public QualityBase {
 public:
@@ -58,7 +57,6 @@ protected:
     QualityBRISQUE( const cv::String& model_file_path, const cv::String& range_file_path );
     /** @brief Type-erased holder for libsvm data, using custom deleter */
     std::unique_ptr<void, _QualityBRISQUEDeleter> _svm_data;
-
 };  // QualityBRISQUE
 }   // quality
 }   // cv
