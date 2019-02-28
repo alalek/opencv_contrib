@@ -51,12 +51,25 @@ public:
     */
     CV_WRAP static cv::Scalar compute( InputArrayOfArrays imgs, const cv::String& model_file_path, const cv::String& range_file_path );
 
+    /* brief destructor */
+    ~QualityBRISQUE() CV_OVERRIDE;
+    
 protected:
 
     /** @brief Internal constructor */
     QualityBRISQUE( const cv::String& model_file_path, const cv::String& range_file_path );
-    /** @brief Type-erased holder for libsvm data, using custom deleter */
-    std::unique_ptr<void, _QualityBRISQUEDeleter> _svm_data;
+
+    // type-erased svmmodel
+    void* _svm_model = nullptr;
+
+    static constexpr const std::size_t _SVM_RANGE_SIZE = 36U;
+    using _svm_range_type = float;
+
+    std::array<_svm_range_type, _SVM_RANGE_SIZE>
+        _svm_range_min = {}
+        , _svm_range_max = {}
+    ;
+
 };  // QualityBRISQUE
 }   // quality
 }   // cv
