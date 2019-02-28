@@ -53,7 +53,7 @@ public:
 
     /* brief destructor */
     ~QualityBRISQUE() CV_OVERRIDE;
-    
+
 protected:
 
     /** @brief Internal constructor */
