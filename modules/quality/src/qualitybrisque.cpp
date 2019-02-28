@@ -53,7 +53,6 @@ namespace
     //  Linux+Mat:  CV_64F is 3X slower than CV_32F
     //  Win32+Mat:  CV_64F is 2X slower than CV_32F
     static constexpr const int BRISQUE_CALC_MAT_TYPE = CV_32F;
-
     // brisque intermediate matrix element type.  float if BRISQUE_CALC_MAT_TYPE == CV_32F, double if BRISQUE_CALC_MAT_TYPE == CV_64F
     using brique_calc_element_type = float;
 
@@ -80,7 +79,7 @@ namespace
 
     typedef Image<brique_calc_element_type> BwImage;
 
-    // function to compute best fit parameters from AGGDfit 
+    // function to compute best fit parameters from AGGDfit
     brisque_mat_type AGGDfit(brisque_mat_type structdis, double& lsigma_best, double& rsigma_best, double& gamma_best)
     {
         // create a copy of an image using BwImage constructor (brisque.h - more info)
@@ -137,7 +136,7 @@ namespace
         CV_Assert(orig.channels() == 1);
 
         auto orig_bw = orig;
-        
+
         // orig_bw now contains the grayscale image normalized to the range 0,1
         int scalenum = 2; // number of times to scale the image
         for (int itr_scale = 1; itr_scale <= scalenum; itr_scale++)
@@ -215,7 +214,7 @@ namespace
                 // calculate the products of the pairs
                 cv::multiply(structdis, shifted_structdis, shifted_structdis);
 
-                // fit the pairwise product to AGGD 
+                // fit the pairwise product to AGGD
                 shifted_structdis = AGGDfit(shifted_structdis, lsigma_best, rsigma_best, gamma_best);
 
                 double constant = sqrt(tgamma(1 / gamma_best)) / sqrt(tgamma(3 / gamma_best));
@@ -239,10 +238,10 @@ namespace
 
         struct svm_node x[37];
 
-        // rescale the brisqueFeatures vector from -1 to 1 
+        // rescale the brisqueFeatures vector from -1 to 1
         // also convert vector to svm node array object
         for (i = 0; i < 36; ++i) {
-            const float 
+            const float
                 min = range_min[i]
                 , max = range_max[i]
                 ;
@@ -335,7 +334,6 @@ QualityBRISQUE::QualityBRISQUE(const cv::String& model_file_path, const cv::Stri
 
     // load range data
     // based on original brisque impl
-    
     //check if file exists
     char buff[100];
     FILE* range_file = fopen(rangepath.c_str(), "r");
