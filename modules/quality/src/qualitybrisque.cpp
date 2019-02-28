@@ -118,8 +118,8 @@ namespace
 
         double prevgamma = 0;
         double prevdiff = 1e10;
-        float sampling = 0.001;
-        for (float gam = 0.2; gam < 10; gam += sampling) //possible to coarsen sampling to quicken the code, with some loss of accuracy
+        double sampling = 0.001;
+        for (double gam = 0.2; gam < 10; gam += sampling) //possible to coarsen sampling to quicken the code, with some loss of accuracy
         {
             double r_gam = tgamma(2 / gam)*tgamma(2 / gam) / (tgamma(1 / gam)*tgamma(3 / gam));
             double diff = abs(r_gam - rhatnorm);
