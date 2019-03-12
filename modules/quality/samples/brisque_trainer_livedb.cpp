@@ -42,86 +42,86 @@ AND THE UNIVERSITY OF TEXAS AT AUSTIN HAS NO OBLIGATION TO PROVIDE MAINTENANCE, 
 
 /* Original Paper: @cite Mittal2 and Original Implementation: @cite Mittal2_software */
 
-#define CATEGORIES 5
-#define IMAGENUM   982
-#define JP2KNUM    227
-#define JPEGNUM    233
-#define WNNUM      174
-#define GBLURNUM   174
-#define FFNUM      174
+namespace {
 
-// collects training data from LIVE R2 database
-// returns {features, responses}, 1 row per image
-std::pair<cv::Mat, cv::Mat> collect_data_live_r2( const std::string& foldername )
-{
-    FILE* fid = nullptr;
+    #define CATEGORIES 5
+    #define IMAGENUM   982
+    #define JP2KNUM    227
+    #define JPEGNUM    233
+    #define WNNUM      174
+    #define GBLURNUM   174
+    #define FFNUM      174
 
-    //----------------------------------------------------
-    // class is the distortion category, there are 982 images in LIVE database
-    std::vector<std::string> distortionlabels;
-    distortionlabels.push_back("jp2k");
-    distortionlabels.push_back("jpeg");
-    distortionlabels.push_back("wn");
-    distortionlabels.push_back("gblur");
-    distortionlabels.push_back("fastfading");
-
-    int imnumber[5] = { 0,227,460,634,808 };
-
-    std::vector<int>categorylabels;
-    categorylabels.insert(categorylabels.end(), JP2KNUM, 0);
-    categorylabels.insert(categorylabels.end(), JPEGNUM, 1);
-    categorylabels.insert(categorylabels.end(), WNNUM, 2);
-    categorylabels.insert(categorylabels.end(), GBLURNUM, 3);
-    categorylabels.insert(categorylabels.end(), FFNUM, 4);
-
-    int  iforg[IMAGENUM];
-    fid = fopen((foldername + "orgs.txt").c_str(), "r");
-    for (int itr = 0; itr < IMAGENUM; itr++)
-        fscanf(fid, "%d", iforg + itr);
-    fclose(fid);
-
-    float dmosscores[IMAGENUM];
-    fid = fopen((foldername + "dmos.txt").c_str(), "r");
-    for (int itr = 0; itr < IMAGENUM; itr++)
-        fscanf(fid, "%f", dmosscores + itr);
-    fclose(fid);
-
-    // features vector, 1 row per image
-    cv::Mat features(0, 0, CV_32FC1);
-
-    // response vector, 1 row per image
-    cv::Mat responses(0, 1, CV_32FC1);
-
-    // current output row
-    int rowidx = 0;
-    for (int itr = 0; itr < IMAGENUM; itr++)
+    // collects training data from LIVE R2 database
+    // returns {features, responses}, 1 row per image
+    std::pair<cv::Mat, cv::Mat> collect_data_live_r2(const std::string& foldername)
     {
-        //Dont compute features for original images
-        if (iforg[itr])
-            continue;
+        FILE* fid = nullptr;
 
-        // append dmos score
-        float score = dmosscores[itr];
-        responses.push_back(cv::Mat(1, 1, CV_32FC1, (void*)&score));
+        //----------------------------------------------------
+        // class is the distortion category, there are 982 images in LIVE database
+        std::vector<std::string> distortionlabels;
+        distortionlabels.push_back("jp2k");
+        distortionlabels.push_back("jpeg");
+        distortionlabels.push_back("wn");
+        distortionlabels.push_back("gblur");
+        distortionlabels.push_back("fastfading");
 
-        // load image, calc features
-        std::string imname = "";
-        imname.append(foldername);
-        imname.append("/");
-        imname.append(distortionlabels[categorylabels[itr]].c_str());
-        imname.append("/img");
-        imname += std::to_string((itr - imnumber[categorylabels[itr]] + 1));
-        imname.append(".bmp");
+        int imnumber[5] = { 0,227,460,634,808 };
 
-        cv::Mat im_features;
-        cv::quality::QualityBRISQUE::computeFeatures( cv::imread(imname), im_features );    // outputs a row vector
+        std::vector<int>categorylabels;
+        categorylabels.insert(categorylabels.end(), JP2KNUM, 0);
+        categorylabels.insert(categorylabels.end(), JPEGNUM, 1);
+        categorylabels.insert(categorylabels.end(), WNNUM, 2);
+        categorylabels.insert(categorylabels.end(), GBLURNUM, 3);
+        categorylabels.insert(categorylabels.end(), FFNUM, 4);
 
-        features.push_back(im_features.row(0)); // append row vector
-    }
+        int  iforg[IMAGENUM];
+        fid = fopen((foldername + "orgs.txt").c_str(), "r");
+        for (int itr = 0; itr < IMAGENUM; itr++)
+            CV_Assert( fscanf(fid, "%d", iforg + itr) > 0);
+        fclose(fid);
 
-    return std::make_pair(std::move(features), std::move(responses));
-}    //    collect_data_live_r2
+        float dmosscores[IMAGENUM];
+        fid = fopen((foldername + "dmos.txt").c_str(), "r");
+        for (int itr = 0; itr < IMAGENUM; itr++)
+            CV_Assert( fscanf(fid, "%f", dmosscores + itr) > 0 );
+        fclose(fid);
 
+        // features vector, 1 row per image
+        cv::Mat features(0, 0, CV_32FC1);
+
+        // response vector, 1 row per image
+        cv::Mat responses(0, 1, CV_32FC1);
+
+        for (int itr = 0; itr < IMAGENUM; itr++)
+        {
+            //Dont compute features for original images
+            if (iforg[itr])
+                continue;
+
+            // append dmos score
+            float score = dmosscores[itr];
+            responses.push_back(cv::Mat(1, 1, CV_32FC1, (void*)&score));
+
+            // load image, calc features
+            std::string imname = "";
+            imname.append(foldername);
+            imname.append("/");
+            imname.append(distortionlabels[categorylabels[itr]].c_str());
+            imname.append("/img");
+            imname += std::to_string((itr - imnumber[categorylabels[itr]] + 1));
+            imname.append(".bmp");
+
+            cv::Mat im_features;
+            cv::quality::QualityBRISQUE::computeFeatures(cv::imread(imname), im_features);    // outputs a row vector
+
+            features.push_back(im_features.row(0)); // append row vector
+        }
+
+        return std::make_pair(std::move(features), std::move(responses));
+    }    //    collect_data_live_r2
+}
 
 inline void printHelp()
 {

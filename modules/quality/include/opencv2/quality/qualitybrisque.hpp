@@ -56,7 +56,7 @@ public:
 
     /**
     @brief static method for computing image features used by the BRISQUE algorithm
-    @param imgs image (BGR(A) or grayscale) for which to compute features
+    @param img image (BGR(A) or grayscale) for which to compute features
     @param features output row vector of features to cv::Mat or cv::UMat
     */
     CV_WRAP static void computeFeatures(InputArray img, OutputArray features);
