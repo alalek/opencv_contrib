@@ -16,8 +16,8 @@ namespace quality
 /**
 @brief BRISQUE (Blind/Referenceless Image Spatial Quality Evaluator) is a No Reference Image Quality Assessment (NR-IQA) algorithm.
 
-BRISQUE computes a score based on extracting Natural Scene Satistics (https://en.wikipedia.org/wiki/Scene_statistics)
-and calculating feature vectors. See Mittal et al. @cite Mittal2 for original paper and original implementation @cite Mittal2_software.
+BRISQUE computes a score based on extracting Natural Scene Statistics (https://en.wikipedia.org/wiki/Scene_statistics)
+and calculating feature vectors. See Mittal et al. @cite Mittal2 for original paper and original implementation @cite Mittal2_software .
 
 A trained model is provided in the /samples/ directory and is trained on the LIVE-R2 database @cite Sheikh as in the original implementation.
 When evaluated against the TID2008 database @cite Ponomarenko , the SROCC is -0.8424 versus the SROCC of -0.8354 in the original implementation.
@@ -29,7 +29,7 @@ public:
     /** @brief Computes BRISQUE quality score for input images
     @param imgs Images for which to compute quality (should be passed as a vector<Mat> in C++ and list of images in Python)
     @returns Score (averaged over individual scores of all images) ranging from 0 to 100
-    (0 denotes the best quality and 100 denotes the poorest quality). The format of the score is: {score, 0., 0., 0.}
+    (0 denotes the best quality and 100 denotes the worst quality). The format of the score is: {score, 0., 0., 0.}
     */
     CV_WRAP cv::Scalar compute( InputArrayOfArrays imgs ) CV_OVERRIDE;
 
