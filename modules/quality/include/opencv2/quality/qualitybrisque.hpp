@@ -14,9 +14,11 @@ namespace quality
 {
 
 /**
-@brief BRISQUE (Blind/Referenceless Image Spatial Quality Evaluator) is a type of No Reference
-Image Quality Assessment. It measures score based on extracting Natural Scene Satistics (https://en.wikipedia.org/wiki/Scene_statistics)
-and calculating feature vectors. @cite Mittal2 for original paper and @cite Mittal2_software for original implementation.
+@brief BRISQUE (Blind/Referenceless Image Spatial Quality Evaluator) is a No Reference Image Quality Assessment (NR-IQA) algorithm.
+
+BRISQUE computes a score based on extracting Natural Scene Satistics (https://en.wikipedia.org/wiki/Scene_statistics)
+and calculating feature vectors. See Mittal et al. @cite Mittal2 for original paper and original implementation @cite Mittal2_software.
+
 A trained model is provided in the /samples/ directory and is trained on the LIVE-R2 database @cite Sheikh as in the original implementation.
 When evaluated against the TID2008 database @cite Ponomarenko , the SROCC is -0.8424 versus the SROCC of -0.8354 in the original implementation.
 C++ code for the BRISQUE LIVE-R2 trainer and TID2008 evaluator are also provided in the /samples/ directory.
