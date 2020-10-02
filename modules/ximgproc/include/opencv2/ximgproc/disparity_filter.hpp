@@ -158,7 +158,7 @@ and MPI-Sintel formats. Note that the resulting disparity map is scaled by 16.
 
 @param dst output disparity map, CV_16S depth
 
-@result returns zero if successfully read the ground truth
+@return returns zero if successfully read the ground truth
  */
 CV_EXPORTS_W
 int readGT(String src_path,OutputArray dst);
@@ -171,7 +171,7 @@ int readGT(String src_path,OutputArray dst);
 
 @param ROI region of interest
 
-@result returns mean square error between GT and src
+@return returns mean square error between GT and src
  */
 CV_EXPORTS_W
 double computeMSE(InputArray GT, InputArray src, Rect ROI);
@@ -187,7 +187,7 @@ double computeMSE(InputArray GT, InputArray src, Rect ROI);
 
 @param thresh threshold used to determine "bad" pixels
 
-@result returns mean square error between GT and src
+@return returns mean square error between GT and src
  */
 CV_EXPORTS_W
 double computeBadPixelPercent(InputArray GT, InputArray src, Rect ROI, int thresh=24/*1.5 pixels*/);
