@@ -98,7 +98,7 @@ static float stat_AX( Mat hist, int cutoff_count, float max_value )
     int bin_count = hist.rows;
     while ( bin < bin_count && counter < cutoff_count )
     {
-        counter += (int) hist.at<float>(bin, 0);
+        counter += (int) hist.at<float>(bin);
         ++bin;
     }
     return (float) bin / bin_count * max_value;

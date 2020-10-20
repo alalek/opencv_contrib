@@ -280,9 +280,9 @@ histc_(const Mat& src, int minVal=0, int maxVal=255, bool normed=false)
     calcHist(&src, 1, 0, Mat(), result, 1, &histSize, &histRange, true, false);
     // normalize
     if(normed) {
-        result /= (int)src.total();
+        result *= 1.0f / (float)src.total();
     }
-    return result.reshape(1,1);
+    return result;
 }
 
 static Mat histc(InputArray _src, int minVal, int maxVal, bool normed)
@@ -333,7 +333,7 @@ static Mat spatial_histogram(InputArray _src, int numPatterns,
             Mat cell_hist = histc(src_cell, 0, (numPatterns-1), true);
             // copy to the result matrix
             Mat result_row = result.row(resultRowIdx);
-            cell_hist.reshape(1,1).convertTo(result_row, CV_32FC1);
+            cell_hist/*.reshape(1, {1, (int)cell_hist.total()})*/.convertTo(result_row, CV_32FC1);
             // increase row count in result matrix
             resultRowIdx++;
         }

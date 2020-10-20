@@ -283,6 +283,7 @@ static Mat_<Vec3f> applyK(const Mat_<Vec3f>& I, float k, float a=-0.3293f, float
 
 static float entropy(const Mat_<float>& I)
 {
+    CV_Assert(!I.empty());
     Mat_<uchar> I_uchar;
     I.convertTo(I_uchar, CV_8U, 255);
 
@@ -294,14 +295,16 @@ static float entropy(const Mat_<float>& I)
     const float* histRange = { range };
     calcHist(&I_uchar, 1, NULL, Mat(), hist, 1, &histSize, &histRange);
 
-    Mat_<float> hist_norm = hist / cv::sum(hist)[0];
+    const float hist_norm_multiplier = 1.0f / (float)I_uchar.total(); // same as: 1.0 / cv::sum(hist)[0];
 
     float E = 0;
-    for (int i = 0; i < hist_norm.rows; i++)
+    for (int i = 0; i < (int)hist.total(); i++)
     {
-        if (hist_norm(i,0) > 0)
+        float v = hist(i);
+        if (v > 0)
         {
-            E += hist_norm(i,0) * std::log2(hist_norm(i,0));
+            v *= hist_norm_multiplier;
+            E += v * std::log2(v);
         }
     }
 
