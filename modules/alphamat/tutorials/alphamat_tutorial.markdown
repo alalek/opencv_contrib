@@ -13,7 +13,7 @@ Given an input image and its corresponding trimap, we try to extract the foregro
 
 |Input Image|Input Trimap|Output alpha Matte|
 |:---:|:---:|:---:|
-|![](../samples/input_images/plant.jpg)|![](../samples/trimaps/plant.png)|![](../samples/output_mattes/plant_result.jpg)|
+| ![](alphamat/samples/input_images/plant.jpg) | ![](alphamat/samples/trimaps/plant.png) | ![](alphamat/samples/output_mattes/plant_result.jpg) |
 
 This project is implementation of @cite aksoy2017designing . It required implementation of parts of other papers [2,3,4].
 
